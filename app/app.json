@@ -16,6 +16,11 @@
     },
     "ios": {
       "supportsTablet": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2070c5bd-10bf-4bbc-a01b-852c30f2105e"
+      }
     }
   }
 }
