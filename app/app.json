@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Sikka",
+    "slug": "sikka-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0F1330"
+    },
+    "android": {
+      "package": "com.sikka.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F1330"
+      }
+    },
+    "ios": {
+      "supportsTablet": false
+    }
+  }
+}
