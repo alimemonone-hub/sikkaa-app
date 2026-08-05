@@ -8,7 +8,7 @@ const authRoutes = require("./routes/auth");
 const walletRoutes = require("./routes/wallet");
 const withdrawRoutes = require("./routes/withdraw");
 const referralRoutes = require("./routes/referral");
-
+const depositRoutes = require("./routes/deposit");
 const app = express();
 
 connectDB();
@@ -31,7 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/referral", referralRoutes);
-
+app.use("/api/deposit", depositRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
