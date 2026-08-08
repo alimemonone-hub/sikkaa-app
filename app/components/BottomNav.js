@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Home, Users, CircleUser } from 'lucide-react-native';
-
+import { Home, Users, CircleUser, Wallet } from 'lucide-react-native';
 const BottomNav = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
   const tabs = [
     { name: 'Home', label: 'HOME', Icon: Home },
+    { name: 'Wallet', label: 'WALLET', Icon: Wallet },
     { name: 'Referral', label: 'TEAM', Icon: Users },
     { name: 'History', label: 'MINE', Icon: CircleUser },
   ];

@@ -9,38 +9,41 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { Banknote, User, Hash, CheckCircle } from "lucide-react-native";
-import client from "../api/client";
+import { Wallet, Smartphone, Hash, CheckCircle } from "lucide-react-native";
+import client from "../api/client"; // tumhara existing axios/api client
 
-const WithdrawScreen = () => {
+const DepositScreen = () => {
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("jazzcash"); // jazzcash | easypaisa
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountName, setAccountName] = useState("");
+  const [senderNumber, setSenderNumber] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const YOUR_NUMBER = "03182181269"; // 👈 tumhara JazzCash/EasyPaisa number
+  const YOUR_NAME = "Shazia Hassan Ali";
 
   const handleSubmit = async () => {
     if (!amount || Number(amount) <= 0) {
       Alert.alert("Error", "Please enter a valid amount");
       return;
     }
-    if (!accountNumber || !accountName) {
+    if (!senderNumber || !transactionId) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
     try {
       setLoading(true);
-      const res = await client.post("/withdraw", {
+      const res = await client.post("/deposit/request", {
         amount: Number(amount),
         method,
-        accountNumber,
-        accountName,
+        senderNumber,
+        transactionId,
       });
-      Alert.alert("Success", res.data.message || "Withdrawal request submitted");
+      Alert.alert("Success", res.data.message || "Deposit request submitted");
       setAmount("");
-      setAccountNumber("");
-      setAccountName("");
+      setSenderNumber("");
+      setTransactionId("");
     } catch (err) {
       Alert.alert(
         "Error",
@@ -54,13 +57,18 @@ const WithdrawScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Withdraw Funds</Text>
+        <Text style={styles.title}>Deposit Funds</Text>
 
+        {/* Instructions box */}
         <View style={styles.infoBox}>
-          <Banknote color="#E53935" size={22} />
-          <Text style={styles.infoText}>
-            Withdrawals are reviewed and processed within a few hours. Minimum withdrawal amount applies.
-          </Text>
+          <Wallet color="#4CAF50" size={22} />
+          <View style={{ marginLeft: 10, flex: 1 }}>
+            <Text style={styles.infoText}>
+              Send money to this {method === "jazzcash" ? "JazzCash" : "EasyPaisa"} number:
+            </Text>
+            <Text style={styles.numberText}>{YOUR_NUMBER}</Text>
+            <Text style={styles.nameText}>Account Name: {YOUR_NAME}</Text>
+          </View>
         </View>
 
         {/* Method selector */}
@@ -111,30 +119,30 @@ const WithdrawScreen = () => {
           onChangeText={setAmount}
         />
 
-        {/* Account Number */}
+        {/* Sender Number */}
         <Text style={styles.label}>Your {method === "jazzcash" ? "JazzCash" : "EasyPaisa"} Number</Text>
         <View style={styles.inputRow}>
-          <Hash color="#666" size={20} />
+          <Smartphone color="#666" size={20} />
           <TextInput
             style={styles.inputFlex}
             placeholder="03xxxxxxxxx"
             placeholderTextColor="#999"
             keyboardType="phone-pad"
-            value={accountNumber}
-            onChangeText={setAccountNumber}
+            value={senderNumber}
+            onChangeText={setSenderNumber}
           />
         </View>
 
-        {/* Account Name */}
-        <Text style={styles.label}>Account Holder Name</Text>
+        {/* Transaction ID */}
+        <Text style={styles.label}>Transaction ID (TID)</Text>
         <View style={styles.inputRow}>
-          <User color="#666" size={20} />
+          <Hash color="#666" size={20} />
           <TextInput
             style={styles.inputFlex}
-            placeholder="Enter full name"
+            placeholder="Enter transaction ID"
             placeholderTextColor="#999"
-            value={accountName}
-            onChangeText={setAccountName}
+            value={transactionId}
+            onChangeText={setTransactionId}
           />
         </View>
 
@@ -146,19 +154,19 @@ const WithdrawScreen = () => {
         >
           <CheckCircle color="#fff" size={20} />
           <Text style={styles.submitText}>
-            {loading ? "Submitting..." : "Submit Withdrawal Request"}
+            {loading ? "Submitting..." : "Submit Deposit Request"}
           </Text>
         </TouchableOpacity>
 
         <Text style={styles.note}>
-          Your withdrawal will be reviewed and approved within a few hours.
+          Your deposit will be reviewed and approved within a few hours.
         </Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default WithdrawScreen;
+export default DepositScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
@@ -166,14 +174,15 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
   infoBox: {
     flexDirection: "row",
-    backgroundColor: "#FFEBEE",
+    backgroundColor: "#E8F5E9",
     padding: 15,
     borderRadius: 12,
     marginBottom: 20,
     alignItems: "flex-start",
-    gap: 10,
   },
-  infoText: { fontSize: 13, color: "#333", flex: 1 },
+  infoText: { fontSize: 13, color: "#333" },
+  numberText: { fontSize: 18, fontWeight: "bold", color: "#2E7D32", marginTop: 4 },
+  nameText: { fontSize: 13, color: "#555", marginTop: 2 },
   label: { fontSize: 14, fontWeight: "600", marginBottom: 8, marginTop: 12, color: "#333" },
   methodRow: { flexDirection: "row", gap: 10 },
   methodButton: {
@@ -184,7 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  methodButtonActive: { backgroundColor: "#E53935", borderColor: "#E53935" },
+  methodButtonActive: { backgroundColor: "#4CAF50", borderColor: "#4CAF50" },
   methodText: { color: "#333", fontWeight: "600" },
   methodTextActive: { color: "#fff" },
   input: {
@@ -205,7 +214,7 @@ const styles = StyleSheet.create({
   inputFlex: { flex: 1, paddingVertical: 12, marginLeft: 8, fontSize: 15 },
   submitButton: {
     flexDirection: "row",
-    backgroundColor: "#E53935",
+    backgroundColor: "#4CAF50",
     padding: 15,
     borderRadius: 12,
     justifyContent: "center",

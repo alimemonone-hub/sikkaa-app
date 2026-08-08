@@ -82,6 +82,7 @@ const HomeScreen = ({navigation}) => {
             yieldVal="30%" 
             cycle="90D"
             image="https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=500"
+            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
           />
           <NodeCard 
             title="Benicia Node" 
@@ -89,6 +90,7 @@ const HomeScreen = ({navigation}) => {
             yieldVal="31%" 
             cycle="90D"
             image="https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&q=80&w=500"
+            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
           />
           <NodeCard 
             title="Corpus Node" 
@@ -96,6 +98,7 @@ const HomeScreen = ({navigation}) => {
             yieldVal="33%" 
             cycle="90D"
             image="https://images.unsplash.com/photo-1563200190-252709e99277?auto=format&fit=crop&q=80&w=500"
+            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
           />
           <NodeCard 
             title="Houston Node" 
@@ -103,6 +106,7 @@ const HomeScreen = ({navigation}) => {
             yieldVal="35%" 
             cycle="90D"
             image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=500"
+            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
           />
         </View>
 
@@ -126,7 +130,7 @@ const HomeScreen = ({navigation}) => {
   );
 };
 
-const NodeCard = ({ title, price, yieldVal, cycle, image }) => (
+const NodeCard = ({ title, price, yieldVal, cycle, image, onBuyNow }) => (
   <View style={styles.nodeCard}>
     <Image source={{ uri: image }} style={styles.nodeImage} />
     <View style={styles.nodeContent}>
@@ -144,10 +148,11 @@ const NodeCard = ({ title, price, yieldVal, cycle, image }) => (
         </View>
       </View>
 
-      <TouchableOpacity style={styles.initializeButton}>
-        <Text style={styles.buttonText}>INITIALIZE</Text>
-        <Zap color="#fff" size={14} fill="#fff" />
-      </TouchableOpacity>
+    
+  <TouchableOpacity style={styles.initializeButton} onPress={onBuyNow}>
+  <Text style={styles.buttonText}>BUY NOW</Text>
+  <Zap color="#fff" size={14} fill="#fff" />
+</TouchableOpacity>
     </View>
   </View>
 );

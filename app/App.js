@@ -1,3 +1,4 @@
+import WalletScreen from "./screens/WalletScreen";
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -9,6 +10,8 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
 import WithdrawScreen from "./screens/WithdrawScreen";
+import Depositscreen from "./screens/Depositscreen";
+import Checkoutscreen from "./screens/Checkoutscreen";
 import ReferralScreen from "./screens/ReferralScreen";
 import HistoryScreen from "./screens/HistoryScreen";
 
@@ -31,8 +34,10 @@ function Router() {
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Withdraw" component={WithdrawScreen} options={{ headerShown: true, title: "" }} />
-          <Stack.Screen name="Referral" component={ReferralScreen} />
+          <Stack.Screen name="Checkout" component={Checkoutscreen} options={{ headerShown: true, title: "Checkout" }} />
+          <Stack.Screen name="Deposit" component={Depositscreen} options={{ headerShown: true, title: "Deposit" }} />
           <Stack.Screen name="History" component={HistoryScreen} />
+          <Stack.Screen name="Wallet" component={WalletScreen} options={{ headerShown: true, title: "Wallet" }} />
         </>
       ) : (
         <>
