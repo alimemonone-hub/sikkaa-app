@@ -79,7 +79,7 @@ const HomeScreen = ({navigation}) => {
           <NodeCard 
             title="Ardmore Node" 
             price="Rs 250" 
-            yieldVal="30%" 
+            yieldVal="rs 50" daily return
             cycle="90D"
             image="https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=500"
             onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
@@ -87,7 +87,7 @@ const HomeScreen = ({navigation}) => {
           <NodeCard 
             title="Benicia Node" 
             price="Rs 500" 
-            yieldVal="31%" 
+            yieldVal="Rs 70" daily return
             cycle="90D"
             image="https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&q=80&w=500"
             onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
@@ -95,7 +95,7 @@ const HomeScreen = ({navigation}) => {
           <NodeCard 
             title="Corpus Node" 
             price="Rs 1,000" 
-            yieldVal="33%" 
+            yieldVal="rs 120" daily return
             cycle="90D"
             image="https://images.unsplash.com/photo-1563200190-252709e99277?auto=format&fit=crop&q=80&w=500"
             onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
