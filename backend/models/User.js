@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
     lastEarnDate: { type: String, default: null }, // stored as YYYY-MM-DD
 
     status: { type: String, enum: ["active", "banned"], default: "active" },
+    isAdmin: {type: Boolean, default: false },
   },
   { timestamps: true }
 );

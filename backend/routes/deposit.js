@@ -1,3 +1,4 @@
+const isAdmin = require("../middleware/isAdmin");
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
@@ -37,14 +38,14 @@ router.get("/my-deposits", protect, async (req, res) => {
   res.json({ deposits });
 });
 
-router.get("/admin/pending", protect, async (req, res) => {
+router.get("/admin/pending", protect, isAdmin, async (req, res) => {
   const deposits = await Deposit.find({ status: "pending" })
     .populate("user", "name phone")
     .sort({ createdAt: -1 });
   res.json({ deposits });
 });
 
-router.put("/admin/:id/status", protect, async (req, res) => {
+router.put("/admin/:id/status", protect, isAdmin, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
 

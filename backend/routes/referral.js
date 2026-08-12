@@ -1,3 +1,4 @@
+const Commission = require("../models/Commission");
 const express = require("express");
 const User = require("../models/User");
 const protect = require("../middleware/auth");
@@ -17,5 +18,6 @@ router.get("/list", protect, async (req, res) => {
   const referred = await User.find({ referredBy: req.user._id }).select("name phone createdAt");
   res.json({ referred });
 });
+
 
 module.exports = router;
