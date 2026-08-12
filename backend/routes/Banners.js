@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Banner = require("../models/banner");
+const Banner = require("../models/Banner");
 const isAdmin = require("../middleware/isAdmin");
 
 // GET /banners - fetch active banners, sorted by order (public - used by app)
