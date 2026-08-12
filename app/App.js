@@ -1,3 +1,4 @@
+
 import WalletScreen from "./screens/WalletScreen";
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
@@ -37,6 +38,7 @@ function Router() {
           <Stack.Screen name="Checkout" component={Checkoutscreen} options={{ headerShown: true, title: "Checkout" }} />
           <Stack.Screen name="Deposit" component={Depositscreen} options={{ headerShown: true, title: "Deposit" }} />
           <Stack.Screen name="History" component={HistoryScreen} />
+          <Stack.Screen name="Referral" component={ReferralScreen} options={{ headerShown: true, title: "Team" }} />
           <Stack.Screen name="Wallet" component={WalletScreen} options={{ headerShown: true, title: "Wallet" }} />
         </>
       ) : (

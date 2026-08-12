@@ -1,12 +1,18 @@
 import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import {
   StyleSheet,
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Share,
+  Modal,
+FlatList,
 } from 'react-native';
 import { 
   User, 
@@ -26,7 +32,58 @@ import {
 import BottomNav from '../components/BottomNav';
 const { width } = Dimensions.get('window');
 
-const MineScreen = ({Navigation}) => {
+const MineScreen = ({Navigation}) => {const { user } = useAuth();
+const [balance, setBalance] = useState(0);
+const [ordersVisible, setOrdersVisible] = useState(false);
+const [orders, setOrders] = useState([]);
+const [ordersLoading, setOrdersLoading] = useState(false);
+
+const handleOrdersPress = async () => {
+  setOrdersVisible(true);
+  setOrdersLoading(true);
+  try {
+    const res = await client.get('/orders/my-orders');
+    setOrders(res.data.orders);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setOrdersLoading(false);
+  }
+};
+const [totalDeposit, setTotalDeposit] = useState(0);
+const [totalWithdrawal, setTotalWithdrawal] = useState(0);
+const handleInviteLink = async () => {
+  try {
+    await Share.share({
+      message: `Sikkaa Corp join karo aur earning shuru karo! Mera referral code use karo: ${user?.referralCode || 'S199FU7'}\n\nApp download link: https://sikkaa-app-production.up.railway.app`,
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+useEffect(() => {
+  const fetchWalletData = async () => {
+    try {
+      const balRes = await client.get("/wallet/balance");
+      setBalance(balRes.data.balance);
+
+      const depositRes = await client.get("/deposit/my-deposits");
+      const approvedDeposits = depositRes.data.deposits.filter(d => d.status === "approved");
+      const depositSum = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
+      setTotalDeposit(depositSum);
+
+      const withdrawRes = await client.get("/withdraw/history");
+      const approvedWithdrawals = withdrawRes.data.withdrawals.filter(w => w.status === "approved" || w.status === "completed");
+      const withdrawSum = approvedWithdrawals.reduce((sum, w) => sum + w.amount, 0);
+      setTotalWithdrawal(withdrawSum);
+    } catch (err) {
+      console.error("Failed to fetch wallet data:", err);
+    }
+  };
+
+  fetchWalletData();
+}, []);
   return (
     <SafeAreaView style={styles.container}>
       {/* Header / Top Bar */}
@@ -50,7 +107,7 @@ const MineScreen = ({Navigation}) => {
                 <View style={styles.logoWave} />
              </View>
              <View style={styles.userInfo}>
-                <Text style={styles.userName}>03182181269</Text>
+                <Text style={styles.userName}>{user?.phone}</Text>
                 <Text style={styles.shareCode}>Share code: s199FU7</Text>
              </View>
           </View>
@@ -58,17 +115,17 @@ const MineScreen = ({Navigation}) => {
           {/* Stats Row */}
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>Rs245</Text>
+              <Text style={styles.statValue}>Rs{balance}</Text>
               <Text style={styles.statLabel}>Balance</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>Rs500</Text>
+              <Text style={styles.statValue}>Rs{totalDeposit}</Text>
               <Text style={styles.statLabel}>Recharge</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>Rs0</Text>
+              <Text style={styles.statValue}>Rs{totalWithdrawal}</Text>
               <Text style={styles.statLabel}>Withdrawal</Text>
             </View>
           </View>
@@ -78,18 +135,47 @@ const MineScreen = ({Navigation}) => {
         <View style={styles.menuContainer}>
           <MenuItem icon={<Wallet color="#fff" size={22} />} label="Wallet" />
           <MenuItem icon={<CreditCard color="#fff" size={22} />} label="Bind bank card" />
-          <MenuItem icon={<Link2 color="#fff" size={22} />} label="Invite Link" />
-          <MenuItem icon={<ClipboardList color="#fff" size={22} />} label="Orders" />
+          <MenuItem icon={<Link2 color="#fff" size={22} />} label="Invite Link" onPress={handleInviteLink} />
+          <MenuItem icon={<ClipboardList color="#fff" size={22} />} label="Orders" onPress={handleOrdersPress} />
           <MenuItem icon={<Receipt color="#fff" size={22} />} label="Payment Record" />
         </View>
       </ScrollView>
       <BottomNav />
+      <Modal visible={ordersVisible} animationType="slide" onRequestClose={() => setOrdersVisible(false)}>
+  <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0c1b' }}>
+    <View style={styles.topBar}>
+      <Text style={styles.topBarTitle}>My Orders</Text>
+      <TouchableOpacity onPress={() => setOrdersVisible(false)}>
+        <Text style={{ color: '#fff', fontSize: 16 }}>Close</Text>
+      </TouchableOpacity>
+    </View>
+    <FlatList
+      data={orders}
+      keyExtractor={(item) => item._id}
+      contentContainerStyle={{ padding: 16 }}
+      ListEmptyComponent={
+        <Text style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>
+          {ordersLoading ? 'Loading...' : 'No orders yet'}
+        </Text>
+      }
+      renderItem={({ item }) => (
+        <View style={{ backgroundColor: '#1d1929', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{item.product?.name}</Text>
+          <Text style={{ color: '#8a8a99', marginTop: 4 }}>Rs {item.amount}</Text>
+          <Text style={{ color: item.status === 'approved' ? '#4CD964' : item.status === 'rejected' ? '#FF3B30' : '#FFC107', marginTop: 4, textTransform: 'capitalize' }}>
+            {item.status}
+          </Text>
+        </View>
+      )}
+    />
+  </SafeAreaView>
+</Modal>
     </SafeAreaView>
   );
 };
 
-const MenuItem = ({ icon, label }) => (
-  <TouchableOpacity style={styles.menuItem}>
+const MenuItem = ({ icon, label, onPress }) => (
+  <TouchableOpacity style={styles.menuItem} onPress={onPress}>
     <View style={styles.menuLeft}>
       <View style={styles.iconCircle}>{icon}</View>
       <Text style={styles.menuLabel}>{label}</Text>

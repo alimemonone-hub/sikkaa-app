@@ -1,9 +1,9 @@
 import React from "react";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   StyleSheet,
   View,
   Text,
-  SafeAreaView,
   TouchableOpacity,
 } from "react-native";
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from "lucide-react-native";

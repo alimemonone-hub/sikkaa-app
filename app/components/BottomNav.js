@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -5,6 +6,7 @@ import { Home, Users, CircleUser, Wallet } from 'lucide-react-native';
 const BottomNav = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
 
   const tabs = [
     { name: 'Home', label: 'HOME', Icon: Home },
@@ -14,7 +16,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[styles.bottomNav, { paddingBottom: insets.bottom || 10 }]}>
       {tabs.map((tab, index) => {
         const isActive = route.name === tab.name;
         return (

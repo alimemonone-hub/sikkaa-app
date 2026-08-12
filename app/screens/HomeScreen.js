@@ -4,12 +4,12 @@ import {
   StyleSheet,
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Image,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   Database, 
   RefreshCw, 
@@ -79,8 +79,8 @@ const HomeScreen = ({navigation}) => {
           <NodeCard 
             title="Ardmore Node" 
             price="Rs 250" 
-            yieldVal="rs 50" daily return
-            cycle="90D"
+            yieldVal="rs 50" //ye daily return hai
+            cycle="24H"   // Rule Har 24 ghante ke
             image="https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=500"
             onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
           />
@@ -103,7 +103,7 @@ const HomeScreen = ({navigation}) => {
           <NodeCard 
             title="Houston Node" 
             price="Rs 2,000" 
-            yieldVal="35%" 
+            daily return="35%" 
             cycle="90D"
             image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=500"
             onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
