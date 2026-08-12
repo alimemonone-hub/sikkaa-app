@@ -1,9 +1,9 @@
-const Commission = require("../models/Commission");
+const Commission = require("../models/commission");
 const Investment = require("../models/Investment");
 const express = require("express");
 const router = express.Router();
-const Order = require("../models/Order");
-const Product = require("../models/Product");
+const Order = require("../models/order");
+const Product = require("../models/product");
 const protect = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
 
