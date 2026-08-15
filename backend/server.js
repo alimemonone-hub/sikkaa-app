@@ -18,8 +18,9 @@ const productRoutes = require("./routes/products");
 const orderRoutes = require("./routes/orders");
 const investmentRoutes = require("./routes/investments");
 const app = express();
-
+app.set('trust proxy', 1); 
 connectDB();
+
 
 app.use(cors());
 app.use(express.json());
