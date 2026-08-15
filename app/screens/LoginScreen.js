@@ -34,7 +34,7 @@ const LoginScreen = ({navigation}) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header Section */}
           <View style={styles.header}>
-            <View style={styles.logoContainer}>
+            <View style={styles.logocontainer}>
               <View style={styles.logoBox}>
                 <Database color="#7c5cfc" size={40} />
               </View>

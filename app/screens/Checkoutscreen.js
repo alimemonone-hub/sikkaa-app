@@ -49,7 +49,7 @@ const CheckoutScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentcontainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Checkout</Text>
 
         {/* Product summary */}

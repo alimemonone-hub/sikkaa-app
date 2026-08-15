@@ -12,14 +12,14 @@ import {
   Dimensions,
   Share,
   Modal,
-FlatList,
+  FlatList,
 } from 'react-native';
-import { 
-  User, 
-  Wallet, 
-  CreditCard, 
-  Link2, 
-  ClipboardList, 
+import {
+  User,
+  Wallet,
+  CreditCard,
+  Link2,
+  ClipboardList,
   Receipt,
   ChevronRight,
   ShieldCheck,
@@ -27,68 +27,122 @@ import {
   Share2,
   Home,
   Users,
-  CircleUser
+  CircleUser,
 } from 'lucide-react-native';
 import BottomNav from '../components/BottomNav';
+
 const { width } = Dimensions.get('window');
 
-const MineScreen = ({Navigation}) => {const { user } = useAuth();
-const [balance, setBalance] = useState(0);
-const [ordersVisible, setOrdersVisible] = useState(false);
-const [orders, setOrders] = useState([]);
-const [ordersLoading, setOrdersLoading] = useState(false);
+const MineScreen = ({ Navigation }) => {
+  const { user } = useAuth();
 
-const handleOrdersPress = async () => {
-  setOrdersVisible(true);
-  setOrdersLoading(true);
-  try {
-    const res = await client.get('/orders/my-orders');
-    setOrders(res.data.orders);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setOrdersLoading(false);
-  }
-};
-const [totalDeposit, setTotalDeposit] = useState(0);
-const [totalWithdrawal, setTotalWithdrawal] = useState(0);
-const handleInviteLink = async () => {
-  try {
-    await Share.share({
-      message: `Sikkaa Corp join karo aur earning shuru karo! Mera referral code use karo: ${user?.referralCode || 'S199FU7'}\n\nApp download link: https://sikkaa-app-production.up.railway.app`,
-    });
-  } catch (err) {
-    console.error(err);
-  }
-};
+  const [balance, setBalance] = useState(0);
+  const [totalDeposit, setTotalDeposit] = useState(0);
+  const [totalWithdrawal, setTotalWithdrawal] = useState(0);
 
-useEffect(() => {
-  const fetchWalletData = async () => {
+  const [ordersVisible, setOrdersVisible] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  const [recordsVisible, setRecordsVisible] = useState(false);
+  const [records, setRecords] = useState([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+
+  const handleInviteLink = async () => {
     try {
-      const balRes = await client.get("/wallet/balance");
-      setBalance(balRes.data.balance);
-
-      const depositRes = await client.get("/deposit/my-deposits");
-      const approvedDeposits = depositRes.data.deposits.filter(d => d.status === "approved");
-      const depositSum = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
-      setTotalDeposit(depositSum);
-
-      const withdrawRes = await client.get("/withdraw/history");
-      const approvedWithdrawals = withdrawRes.data.withdrawals.filter(w => w.status === "approved" || w.status === "completed");
-      const withdrawSum = approvedWithdrawals.reduce((sum, w) => sum + w.amount, 0);
-      setTotalWithdrawal(withdrawSum);
+      await Share.share({
+        message: `Sikkaa Corp join karo aur earning shuru karo! Mera referral code use karo: ${user?.referralCode || 'S199FU7'}\n\nApp download link: https://sikkaa-app-production.up.railway.app`,
+      });
     } catch (err) {
-      console.error("Failed to fetch wallet data:", err);
+      console.error(err);
     }
   };
 
-  fetchWalletData();
-}, []);
+  const handleOrdersPress = async () => {
+    setOrdersVisible(true);
+    setOrdersLoading(true);
+    try {
+      const res = await client.get('/orders/my-orders');
+      setOrders(res.data.orders);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const handlePaymentRecordPress = async () => {
+    setRecordsVisible(true);
+    setRecordsLoading(true);
+    try {
+      const [ordersRes, depositsRes, withdrawalsRes] = await Promise.all([
+        client.get('/orders/my-orders'),
+        client.get('/deposit/my-deposits'),
+        client.get('/withdraw/history'),
+      ]);
+      const orderRecords = ordersRes.data.orders.map((o) => ({
+        _id: o._id,
+        type: 'Package',
+        title: o.product?.name || 'Package',
+        amount: o.amount,
+        status: o.status,
+        createdAt: o.createdAt,
+      }));
+      const depositRecords = depositsRes.data.deposits.map((d) => ({
+        _id: d._id,
+        type: 'Deposit',
+        title: 'Deposit',
+        amount: d.amount,
+        status: d.status,
+        createdAt: d.createdAt,
+      }));
+      const withdrawalRecords = withdrawalsRes.data.withdrawals.map((w) => ({
+        _id: w._id,
+        type: 'Withdrawal',
+        title: 'Withdrawal',
+        amount: w.amount,
+        status: w.status,
+        createdAt: w.createdAt,
+      }));
+      const merged = [...orderRecords, ...depositRecords, ...withdrawalRecords].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setRecords(merged);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchWalletData = async () => {
+      try {
+        const balRes = await client.get('/wallet/balance');
+        setBalance(balRes.data.balance);
+
+        const depositRes = await client.get('/deposit/my-deposits');
+        const approvedDeposits = depositRes.data.deposits.filter((d) => d.status === 'approved');
+        const depositSum = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
+        setTotalDeposit(depositSum);
+
+        const withdrawRes = await client.get('/withdraw/history');
+        const approvedWithdrawals = withdrawRes.data.withdrawals.filter(
+          (w) => w.status === 'approved' || w.status === 'completed'
+        );
+        const withdrawSum = approvedWithdrawals.reduce((sum, w) => sum + w.amount, 0);
+        setTotalWithdrawal(withdrawSum);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchWalletData();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header / Top Bar */}
       <View style={styles.topBar}>
-        <View style={styles.searchIconPlaceholder} />
         <Text style={styles.topBarTitle}>Mine</Text>
         <View style={styles.topIconsRow}>
           <ShieldCheck color="#4ade80" size={24} />
@@ -98,21 +152,17 @@ useEffect(() => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
-             <View style={styles.logoContainer}>
-                {/* Valero Logo Placeholder */}
-                <Text style={styles.logoText}>V</Text>
-                <View style={styles.logoWave} />
-             </View>
-             <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user?.phone}</Text>
-                <Text style={styles.shareCode}>Share code: s199FU7</Text>
-             </View>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoText}>V</Text>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{user?.phone}</Text>
+              <Text style={styles.shareCode}>Share code: {user?.referralCode || 'S199FU7'}</Text>
+            </View>
           </View>
-          
-          {/* Stats Row */}
+
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>Rs{balance}</Text>
@@ -137,39 +187,96 @@ useEffect(() => {
           <MenuItem icon={<CreditCard color="#fff" size={22} />} label="Bind bank card" />
           <MenuItem icon={<Link2 color="#fff" size={22} />} label="Invite Link" onPress={handleInviteLink} />
           <MenuItem icon={<ClipboardList color="#fff" size={22} />} label="Orders" onPress={handleOrdersPress} />
-          <MenuItem icon={<Receipt color="#fff" size={22} />} label="Payment Record" />
+          <MenuItem icon={<Receipt color="#fff" size={22} />} label="Payment Record" onPress={handlePaymentRecordPress} />
         </View>
       </ScrollView>
+
       <BottomNav />
+
       <Modal visible={ordersVisible} animationType="slide" onRequestClose={() => setOrdersVisible(false)}>
-  <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0c1b' }}>
-    <View style={styles.topBar}>
-      <Text style={styles.topBarTitle}>My Orders</Text>
-      <TouchableOpacity onPress={() => setOrdersVisible(false)}>
-        <Text style={{ color: '#fff', fontSize: 16 }}>Close</Text>
-      </TouchableOpacity>
-    </View>
-    <FlatList
-      data={orders}
-      keyExtractor={(item) => item._id}
-      contentContainerStyle={{ padding: 16 }}
-      ListEmptyComponent={
-        <Text style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>
-          {ordersLoading ? 'Loading...' : 'No orders yet'}
-        </Text>
-      }
-      renderItem={({ item }) => (
-        <View style={{ backgroundColor: '#1d1929', borderRadius: 12, padding: 14, marginBottom: 12 }}>
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{item.product?.name}</Text>
-          <Text style={{ color: '#8a8a99', marginTop: 4 }}>Rs {item.amount}</Text>
-          <Text style={{ color: item.status === 'approved' ? '#4CD964' : item.status === 'rejected' ? '#FF3B30' : '#FFC107', marginTop: 4, textTransform: 'capitalize' }}>
-            {item.status}
-          </Text>
-        </View>
-      )}
-    />
-  </SafeAreaView>
-</Modal>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0c1b' }}>
+          <View style={styles.topBar}>
+            <Text style={styles.topBarTitle}>My Orders</Text>
+            <TouchableOpacity onPress={() => setOrdersVisible(false)}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={orders}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{ padding: 16 }}
+            ListEmptyComponent={
+              <Text style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>
+                {ordersLoading ? 'Loading...' : 'No orders yet'}
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <View style={{ backgroundColor: '#1d1929', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{item.product?.name}</Text>
+                <Text style={{ color: '#8a8a99', marginTop: 4 }}>Rs {item.amount}</Text>
+                <Text
+                  style={{
+                    color:
+                      item.status === 'approved'
+                        ? '#4CD964'
+                        : item.status === 'rejected'
+                        ? '#FF3B30'
+                        : '#FFC107',
+                    marginTop: 4,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {item.status}
+                </Text>
+              </View>
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal visible={recordsVisible} animationType="slide" onRequestClose={() => setRecordsVisible(false)}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0c1b' }}>
+          <View style={styles.topBar}>
+            <Text style={styles.topBarTitle}>Payment Record</Text>
+            <TouchableOpacity onPress={() => setRecordsVisible(false)}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={records}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{ padding: 16 }}
+            ListEmptyComponent={
+              <Text style={{ color: '#999', textAlign: 'center', marginTop: 40 }}>
+                {recordsLoading ? 'Loading...' : 'No records yet'}
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <View style={{ backgroundColor: '#1d1929', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{item.title}</Text>
+                  <Text style={{ color: '#8a8a99', fontSize: 12 }}>{item.type}</Text>
+                </View>
+                <Text style={{ color: '#8a8a99', marginTop: 4 }}>Rs {item.amount}</Text>
+                <Text
+                  style={{
+                    color:
+                      item.status === 'approved' || item.status === 'completed'
+                        ? '#4CD964'
+                        : item.status === 'rejected'
+                        ? '#FF3B30'
+                        : '#FFC107',
+                    marginTop: 4,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {item.status}
+                </Text>
+              </View>
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -227,27 +334,25 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     backgroundColor: '#0095ff',
-    borderRadius: 8,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
   },
   logoText: {
     color: '#fff',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
   },
   userInfo: {
-    flex: 1,
+    marginLeft: 16,
   },
   userName: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
   shareCode: {
-    color: '#a1a1aa',
-    fontSize: 12,
+    color: '#8a8a99',
     marginTop: 4,
   },
   statsRow: {
@@ -261,43 +366,41 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   statLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
+    color: '#e6e0ff',
     marginTop: 4,
   },
   statDivider: {
     width: 1,
-    height: '60%',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   menuContainer: {
-    paddingHorizontal: 16,
+    marginHorizontal: 16,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1d1929',
+    backgroundColor: '#1d1929',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
   },
   menuLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#1d1929',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#2d254d',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   menuLabel: {
     color: '#fff',

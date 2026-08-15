@@ -56,7 +56,7 @@ const DepositScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentcontainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Deposit Funds</Text>
 
         {/* Instructions box */}

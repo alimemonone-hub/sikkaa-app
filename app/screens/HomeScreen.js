@@ -1,5 +1,6 @@
 import BottomNav from '../components/BottomNav';
 import React from 'react';
+import { useState,useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
@@ -23,6 +25,47 @@ import {
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({navigation}) => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const logEntries = [
+  "User +92 033****6429 withdraw Rs330",
+  "User +92 034****1122 deposit Rs500",
+  "User +92 031****7788 withdraw Rs200",
+  "User +92 030****4521 deposit Rs1000",
+  "User +92 032****9083 withdraw Rs450",
+];
+const singleText = logEntries.join("     ");
+const tickerText = singleText + singleText;
+const heroImages = [
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1000',
+  'https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=1000',
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1000',
+];
+const heroScrollRef = useRef(null);
+const [activeSlide, setActiveSlide] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setActiveSlide((prev) => {
+      const next = (prev + 1) % heroImages.length;
+      heroScrollRef.current?.scrollTo({ x: next * width, animated: true });
+      return next;
+    });
+  }, 3000);
+  return () => clearInterval(interval);
+}, []);
+const [textWidth, setTextWidth] = useState(0);
+  useEffect(() => {
+  if (textWidth === 0) return;
+  const animate = () => {
+    scrollX.setValue(0);
+    Animated.timing(scrollX, {
+      toValue: -textWidth,
+      duration: 15000,
+      useNativeDriver: true,
+    }).start(() => animate());
+  };
+  animate();
+}, [textWidth]);
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Bar */}
@@ -37,31 +80,61 @@ const HomeScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Log Status Banner */}
-      <View style={styles.logBanner}>
-        <Text style={styles.logText}>
-          LOG_STATUS: <Text style={styles.logHighlight}>User +92 033****6429 withdraw Rs330</Text>
-        </Text>
-      </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Hero Slider */}
+{/* Log Status Banner */}
+<View style={[styles.logBanner, { overflow: 'hidden' }]}>
+  <Animated.Text
+    style={[styles.logText, { width: textWidth *2, transform: [{ translateX: scrollX }] }]}
+    numberOfLines={1}
+  >
+    LOG_STATUS: {tickerText}
+  </Animated.Text>
+  {textWidth === 0 && (
+    <Text
+      style={[styles.logText, { position: 'absolute', opacity: 0, left: 0 }]}
+      onLayout={(e) => setTextWidth(e.nativeEvent.layout.width )}
+    >
+      LOG_STATUS: {singleText}
+    </Text>
+  )}
+</View>
+
+      <ScrollView contentcontainerStyle={styles.scrollContent}>
         <View style={styles.heroContainer}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1000' }} 
-            style={styles.heroImage}
-          />
-          <View style={styles.heroOverlay}>
-            <View style={styles.heroTag}>
-              <Text style={styles.heroTagText}>ACTIVE_NODE</Text>
-            </View>
-          </View>
-          <View style={styles.dotsContainer}>
-            <View style={[styles.dot, styles.activeDot]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-          </View>
-        </View>
+
+  <ScrollView
+    ref={heroScrollRef}
+    horizontal
+    pagingEnabled
+    showsHorizontalScrollIndicator={false}
+    scrollEventThrottle={16}
+    onMomentumScrollEnd={(e) => {
+      const slide = Math.round(e.nativeEvent.contentOffset.x / width);
+      setActiveSlide(slide);
+    }}
+  >
+    {heroImages.map((img, index) => (
+      <Image
+        key={index}
+        source={{ uri: img }}
+        style={[styles.heroImage, {width: width, height: 220}]}
+      />
+    ))}
+  </ScrollView>
+  <View style={styles.heroOverlay}>
+    <View style={styles.heroTag}>
+      <Text style={styles.heroTagText}>ACTIVE_NODE</Text>
+    </View>
+  </View>
+  <View style={styles.dotsContainer}>
+    {heroImages.map((_, index) => (
+      <View
+        key={index}
+        style={[styles.dot, activeSlide === index && styles.activeDot]}
+      />
+    ))}
+  </View>
+</View>
 
         {/* Section Header */}
         <View style={styles.sectionHeader}>
