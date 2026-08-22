@@ -1,5 +1,5 @@
 const Commission = require("../models/commission");
-const User = require("../models/user");
+const User = require("../models/User");
 const Investment = require("../models/Investment");
 const express = require("express");
 const router = express.Router();
