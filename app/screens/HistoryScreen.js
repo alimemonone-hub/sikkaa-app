@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import client from '../api/client';
@@ -33,7 +34,8 @@ import BottomNav from '../components/BottomNav';
 
 const { width } = Dimensions.get('window');
 
-const MineScreen = ({ Navigation }) => {
+const MineScreen = () => {
+  const navigation = useNavigation();
   const { user } = useAuth();
 
   const [balance, setBalance] = useState(0);
@@ -115,30 +117,29 @@ const MineScreen = ({ Navigation }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchWalletData = async () => {
-      try {
-        const balRes = await client.get('/wallet/balance');
-        setBalance(balRes.data.balance);
+  const fetchWalletData = async () => {
+  try {
+    const balRes = await client.get('/wallet/balance');
+    setBalance(balRes.data.balance);
 
-        const depositRes = await client.get('/deposit/my-deposits');
-        const approvedDeposits = depositRes.data.deposits.filter((d) => d.status === 'approved');
-        const depositSum = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
-        setTotalDeposit(depositSum);
+    const depositRes = await client.get('/deposit/my-deposits');
+    const approvedDeposits = depositRes.data.deposits.filter((d) => d.status === 'approved');
+    const depositSum = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
+    setTotalDeposit(depositSum);
 
-        const withdrawRes = await client.get('/withdraw/history');
-        const approvedWithdrawals = withdrawRes.data.withdrawals.filter(
-          (w) => w.status === 'approved' || w.status === 'completed'
-        );
-        const withdrawSum = approvedWithdrawals.reduce((sum, w) => sum + w.amount, 0);
-        setTotalWithdrawal(withdrawSum);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchWalletData();
-  }, []);
+    const withdrawRes = await client.get('/withdraw/history');
+    const approvedWithdrawals = withdrawRes.data.withdrawals.filter(
+      (w) => w.status === 'approved' || w.status === 'completed'
+    );
+    const withdrawSum = approvedWithdrawals.reduce((sum, w) => sum + w.amount, 0);
+    setTotalWithdrawal(withdrawSum);
+  } catch (err) {
+    console.error(err);
+  }
+};
+useEffect(() => {
+  fetchWalletData();
+}, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,7 +147,9 @@ const MineScreen = ({ Navigation }) => {
         <Text style={styles.topBarTitle}>Mine</Text>
         <View style={styles.topIconsRow}>
           <ShieldCheck color="#4ade80" size={24} />
+          <TouchableOpacity onPress={fetchWalletData}>
           <RefreshCw color="#fff" size={24} />
+          </TouchableOpacity>
           <Share2 color="#fff" size={24} />
         </View>
       </View>
@@ -155,10 +158,12 @@ const MineScreen = ({ Navigation }) => {
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
             <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>V</Text>
+              <Text style={styles.logoText}>
+                {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </Text>
             </View>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{user?.phone}</Text>
+              <Text style={styles.userName}>{user?.name}</Text>
               <Text style={styles.shareCode}>Share code: {user?.referralCode || 'S199FU7'}</Text>
             </View>
           </View>
@@ -183,7 +188,7 @@ const MineScreen = ({ Navigation }) => {
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          <MenuItem icon={<Wallet color="#fff" size={22} />} label="Wallet" />
+          <MenuItem icon={<Wallet color="#fff" size={22} />} label="Wallet" onPress={( ) => navigation.navigate("Wallet")} />
           <MenuItem icon={<CreditCard color="#fff" size={22} />} label="Bind bank card" />
           <MenuItem icon={<Link2 color="#fff" size={22} />} label="Invite Link" onPress={handleInviteLink} />
           <MenuItem icon={<ClipboardList color="#fff" size={22} />} label="Orders" onPress={handleOrdersPress} />

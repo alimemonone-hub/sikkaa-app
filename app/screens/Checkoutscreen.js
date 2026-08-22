@@ -3,13 +3,13 @@ import {
   StyleSheet,
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TextInput,
   TouchableOpacity,
   Alert,
 } from "react-native";
 import { Smartphone, Hash, CheckCircle } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import client from "../api/client";
 
 const CheckoutScreen = ({ route, navigation }) => {
@@ -50,7 +50,7 @@ const CheckoutScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentcontainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Checkout</Text>
+        <Text style={styles.title}>     Checkout</Text>
 
         {/* Product summary */}
         <View style={styles.productBox}>
@@ -68,7 +68,7 @@ const CheckoutScreen = ({ route, navigation }) => {
         </View>
 
         {/* Method selector */}
-        <Text style={styles.label}>Select Payment Method</Text>
+        <Text style={styles.label}>   Select Payment Method</Text>
         <View style={styles.methodRow}>
           <TouchableOpacity
             style={[styles.methodButton, method === "jazzcash" && styles.methodButtonActive]}
@@ -89,7 +89,7 @@ const CheckoutScreen = ({ route, navigation }) => {
         </View>
 
         {/* Sender Number */}
-        <Text style={styles.label}>Your {method === "jazzcash" ? "JazzCash" : "EasyPaisa"} Number</Text>
+        <Text style={styles.label}>   Your {method === "jazzcash" ? "JazzCash" : "EasyPaisa"} Number</Text>
         <View style={styles.inputRow}>
           <Smartphone color="#666" size={20} />
           <TextInput
@@ -102,13 +102,13 @@ const CheckoutScreen = ({ route, navigation }) => {
           />
         </View>
 
-        {/* Transaction ID */}
-        <Text style={styles.label}>Transaction ID (TID)</Text>
+             {/* Transaction ID */}
+        <Text style={styles.label}>    Transaction ID (TID)</Text>
         <View style={styles.inputRow}>
           <Hash color="#666" size={20} />
           <TextInput
             style={styles.inputFlex}
-            placeholder="Enter transaction ID"
+            placeholder=    "Enter transaction ID"
             placeholderTextColor="#999"
             value={transactionId}
             onChangeText={setTransactionId}
@@ -129,62 +129,71 @@ const CheckoutScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
 export default CheckoutScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#0f0c1b" },
   scrollContent: { padding: 20 },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20, color: "#fff" },
   productBox: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#1a1625",
     padding: 15,
     borderRadius: 12,
     marginBottom: 15,
   },
-  productName: { fontSize: 16, fontWeight: "bold" },
-  productPrice: { fontSize: 18, color: "#4CAF50", fontWeight: "700", marginTop: 4 },
+  productName: { fontSize: 16, fontWeight: "bold", color: "#fff" },
+  productPrice: { fontSize: 18, color: "#4ade80", fontWeight: "700", marginTop: 4 },
   infoBox: {
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#16251c",
     padding: 15,
     borderRadius: 12,
     marginBottom: 20,
   },
-  infoText: { fontSize: 13, color: "#333" },
-  numberText: { fontSize: 18, fontWeight: "bold", color: "#2E7D32", marginTop: 4 },
-  nameText: { fontSize: 13, color: "#555", marginTop: 2 },
-  label: { fontSize: 14, fontWeight: "600", marginBottom: 8, marginTop: 12, color: "#333" },
+  infoText: { fontSize: 13, color: "#c7c7d1" },
+  numberText: { fontSize: 18, fontWeight: "bold", color: "#4ade80", marginTop: 4 },
+  nameText: { fontSize: 13, color: "#a1a1aa", marginTop: 2 },
+  label: { fontSize: 14, fontWeight: "600", marginBottom: 8, marginTop: 12, color: "#fff" },
   methodRow: { flexDirection: "row", gap: 10 },
   methodButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    paddingVertical: 14,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#2d254d",
+    backgroundColor: "#1a1625",
     alignItems: "center",
   },
-  methodButtonActive: { backgroundColor: "#4CAF50", borderColor: "#4CAF50" },
-  methodText: { color: "#333", fontWeight: "600" },
-  methodTextActive: { color: "#fff" },
+  methodButtonActive: {
+    backgroundColor: "#4ade80",
+    borderColor: "#4ade80",
+  },
+  methodText: { color: "#a1a1aa", fontWeight: "600" },
+  methodTextActive: { color: "#0f0c1b", fontWeight: "700" },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#2d254d",
+    backgroundColor: "#1a1625",
     borderRadius: 10,
     paddingHorizontal: 12,
+    gap: 10,
   },
-  inputFlex: { flex: 1, paddingVertical: 12, marginLeft: 8, fontSize: 15 },
+  inputFlex: {
+    flex: 1,
+    paddingVertical: 12,
+    color: "#fff",
+  },
   submitButton: {
+    backgroundColor: "#4ade80",
+    borderRadius: 10,
+    paddingVertical: 16,
     flexDirection: "row",
-    backgroundColor: "#4CAF50",
-    padding: 15,
-    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 25,
     gap: 8,
+    marginTop: 10,
   },
-  submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  note: { textAlign: "center", color: "#888", fontSize: 12, marginTop: 15 },
+  submitText: { color: "#0f0c1b", fontSize: 16, fontWeight: "700" },
+  note: { fontSize: 12, color: "#a1a1aa", textAlign: "center", marginTop: 12 },
 });

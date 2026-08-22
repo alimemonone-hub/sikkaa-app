@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Sikka",
+    "name": "Sikka invest",
     "slug": "sikka-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "splash": {
@@ -10,6 +10,7 @@
     },
     "android": {
       "package": "com.sikka.app",
+      "versionCode" : 2,
       "adaptiveIcon": {
         "backgroundColor": "#0F1330"
       }

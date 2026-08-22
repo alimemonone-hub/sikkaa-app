@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Alert } from  'react-native';
+import client from '../api/client';
 import {
   StyleSheet,
   View,
@@ -25,6 +27,18 @@ const LoginScreen = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleLogin = async () => {
+  if (!phone || !password) {
+    Alert.alert("Error", "Please enter phone and password");
+    return;
+  }
+  try {
+    const res = await client.post("/auth/login", { phone, password });
+    // yahan token save karna hai (jaise AsyncStorage) aur navigation.navigate("Home") ya jo bhi aapka home route hai
+  } catch (err) {
+    Alert.alert("Error", err.response?.data?.message || "Login failed");
+  }
+};
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -105,8 +119,8 @@ const LoginScreen = ({navigation}) => {
             </View>
 
             {/* Initialize Button */}
-            <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8}>
-              <Text style={styles.buttonText}>INITIALIZE</Text>
+            <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8} onPress={handleLogin}>
+              <Text style={styles.buttonText}>LOGIN</Text>
               <Zap color="#fff" size={20} fill="#fff" />
             </TouchableOpacity>
 

@@ -1,5 +1,6 @@
 import BottomNav from '../components/BottomNav';
 import React from 'react';
+import * as Updates from "expo-updates";
 import { useState,useRef, useEffect } from 'react';
 import {
   StyleSheet,
@@ -12,6 +13,7 @@ import {
   Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import client from "../api/client";
 import { 
   Database, 
   RefreshCw, 
@@ -25,6 +27,13 @@ import {
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({navigation}) => {
+  const handleRefresh = async () => {
+  try {
+    await Updates.reloadAsync();
+  } catch (e) {
+    console.log("Reload failed:", e);
+  }
+};
   const scrollX = useRef(new Animated.Value(0)).current;
   const logEntries = [
   "User +92 033****6429 withdraw Rs330",
@@ -42,7 +51,19 @@ const heroImages = [
 ];
 const heroScrollRef = useRef(null);
 const [activeSlide, setActiveSlide] = useState(0);
+const [products, setProducts] = useState([]);
 
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await client.get("/products");
+      setProducts(res.data.products);
+    } catch (err) {
+      console.log("Failed to load products:", err);
+    }
+  };
+  fetchProducts();
+}, []);
 useEffect(() => {
   const interval = setInterval(() => {
     setActiveSlide((prev) => {
@@ -72,10 +93,12 @@ const [textWidth, setTextWidth] = useState(0);
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
           <Database color="#4ade80" size={24} />
-          <Text style={styles.brandText}>SIKKA_CORP</Text>
+          <Text style={styles.brandText}>SIKKA_INVEST</Text>
         </View>
         <View style={styles.topIcons}>
+          <TouchableOpacity onPress={handleRefresh}>
           <RefreshCw color="#fff" size={20} />
+          </TouchableOpacity>
           <View style={styles.statusDot} />
         </View>
       </View>
@@ -148,56 +171,39 @@ const [textWidth, setTextWidth] = useState(0);
         </View>
 
         {/* Nodes Grid */}
-        <View style={styles.nodesGrid}>
-          <NodeCard 
-            title="Ardmore Node" 
-            price="Rs 250" 
-            yieldVal="rs 50" //ye daily return hai
-            cycle="24H"   // Rule Har 24 ghante ke
-            image="https://images.unsplash.com/photo-1540350394557-8d14678e7f91?auto=format&fit=crop&q=80&w=500"
-            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
-          />
-          <NodeCard 
-            title="Benicia Node" 
-            price="Rs 500" 
-            yieldVal="Rs 70" daily return
-            cycle="90D"
-            image="https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&q=80&w=500"
-            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
-          />
-          <NodeCard 
-            title="Corpus Node" 
-            price="Rs 1,000" 
-            yieldVal="rs 120" daily return
-            cycle="90D"
-            image="https://images.unsplash.com/photo-1563200190-252709e99277?auto=format&fit=crop&q=80&w=500"
-            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
-          />
-          <NodeCard 
-            title="Houston Node" 
-            price="Rs 2,000" 
-            daily return="35%" 
-            cycle="90D"
-            image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=500"
-            onBuyNow={() => navigation.navigate("Checkout", { product: { name: "Ardmore Node", price: 250 } })}
-          />
-        </View>
+<View style={styles.nodesGrid}>
+  {products.map((p) => (
+    <NodeCard
+      key={p._id}
+      title={p.name}
+      price={`Rs ${p.price}`}
+      yieldVal={`Rs ${p.dailyReturn}`}
+      cycle={(p.dailyReturn / 24).toFixed(2)}
+      image={p.imageUrl}
+      onBuyNow={() =>
+        navigation.navigate("Checkout", {
+          product: { name: p.name, price: p.price, _id: p._id },
+        })
+      }
+    />
+  ))}
+</View>
 
-        {/* Global Throughput Stats */}
-        <View style={styles.statsCard}>
-          <View style={styles.statsHeader}>
-            <Text style={styles.statsLabel}>GLOBAL THROUGHPUT</Text>
-            <TrendingUp color="#4ade80" size={16} />
-          </View>
-          <View style={styles.statsRow}>
-            <Text style={styles.statsValue}>1.2M Barrels</Text>
-            <Text style={styles.statsPercent}>+2.4%</Text>
-          </View>
-          <View style={{ height: 60, alignItems: 'center', justifyContent: 'center' }}></View>
-             <TrendingUp color="#7c5cfc" size={40} />
-        </View>
-      </ScrollView>
-
+{/* Global Throughput Stats */}
+<View style={[styles.statsCard, { marginBottom: 100 }]}>
+  <View style={styles.statsHeader}>
+    <Text style={styles.statsLabel}>GLOBAL THROUGHPUT</Text>
+    <TrendingUp color="#4ade80" size={16} />
+  </View>
+  <View style={styles.statsRow}>
+    <Text style={styles.statsValue}>1.2M Barrels</Text>
+    <Text style={styles.statsPercent}>+2.4%</Text>
+  </View>
+  <View style={{ height: 60, alignItems: 'center', justifyContent: 'center' }}>
+    <TrendingUp color="#7c5cfc" size={40} />
+  </View>
+</View> 
+</ScrollView>
     <BottomNav />
     </SafeAreaView>
   );
@@ -212,11 +218,11 @@ const NodeCard = ({ title, price, yieldVal, cycle, image, onBuyNow }) => (
       
       <View style={styles.nodeMetrics}>
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>YIELD</Text>
+          <Text style={styles.metricLabel}>Daily Return</Text>
           <Text style={styles.metricValue}>{yieldVal}</Text>
         </View>
         <View style={styles.metricRow}>
-          <Text style={styles.metricLabel}>CYCLE</Text>
+          <Text style={styles.metricLabel}>Hourly</Text>
           <Text style={styles.metricValue}>{cycle}</Text>
         </View>
       </View>
